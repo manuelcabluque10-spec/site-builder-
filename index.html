@@ -6,7 +6,7 @@
     <title>SiteSprout CRM - Spain Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-4">
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 relative">
 
     <!-- Header Section -->
     <header class="max-w-md mx-auto mb-6 flex flex-col gap-2">
@@ -37,14 +37,26 @@
 
             <!-- Dynamic Business Cards Container -->
             <div id="businessContainer" class="flex flex-col gap-4">
-                <!-- Javascript will load cards here -->
+                <!-- Loaded via JS -->
             </div>
         </div>
     </main>
 
+    <!-- Interactive Popup Modal (Hidden by Default) -->
+    <div id="loadingModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl max-w-sm w-full text-center flex flex-col gap-4 shadow-2xl">
+            <div class="w-12 h-12 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <h3 class="text-lg font-bold text-gray-100">Generating AI Website...</h3>
+            <p id="modalBizName" class="text-emerald-400 font-semibold text-sm"></p>
+            <p class="text-xs text-gray-400">Analyzing layout, creating custom copy, and building theme elements for this business.</p>
+            <button onclick="closeModal()" class="mt-2 w-full bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs py-2 rounded-lg font-medium transition-colors">
+                Cancel
+            </button>
+        </div>
+    </div>
+
     <!-- Dynamic Functionality Script -->
     <script>
-        // Database of businesses across different cities
         const cityData = {
             Murcia: [
                 { name: "La Pequeña Taberna", rating: "4.7", address: "Plaza de San Juan, 4, 30003 Murcia", hours: "13:00 - 16:00, 20:00 - 00:00", phone: "+34 968 21 98 40" },
@@ -67,10 +79,11 @@
         function updateCityData() {
             const selectedCity = document.getElementById("citySelect").value;
             const container = document.getElementById("businessContainer");
-            container.innerHTML = ""; // Clear current cards
+            container.innerHTML = "";
 
-            // Build new cards dynamically
             cityData[selectedCity].forEach(biz => {
+                // Escaping single quotes for restaurant names safely
+                const safeName = biz.name.replace(/'/g, "\\'");
                 container.innerHTML += `
                     <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 shadow-sm flex flex-col gap-3">
                         <div class="flex justify-between items-start">
@@ -82,7 +95,7 @@
                             <p>🕒 Horario: ${biz.hours}</p>
                             <p>📞 Teléfono: ${biz.phone}</p>
                         </div>
-                        <button class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2 rounded-lg text-sm transition-colors mt-1">
+                        <button onclick="triggerGeneration('${safeName}')" class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2 rounded-lg text-sm transition-colors mt-1">
                             Generate Website
                         </button>
                     </div>
@@ -90,7 +103,17 @@
             });
         }
 
-        // Initialize with default city (Murcia)
+        // Functions to handle the interactive popup
+        function triggerGeneration(businessName) {
+            document.getElementById("modalBizName").innerText = businessName;
+            document.getElementById("loadingModal").classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("loadingModal").classList.add("hidden");
+        }
+
+        // Initialize view
         updateCityData();
     </script>
 </body>
