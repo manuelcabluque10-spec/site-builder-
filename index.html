@@ -14,7 +14,7 @@
         <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg border border-gray-700">
             <span class="text-sm font-medium">Target Location:</span>
             <!-- City Dropdown Selector -->
-            <select id="citySelect" onchange="updateCityData()" class="bg-gray-900 text-emerald-400 font-bold rounded p-1 border border-gray-600 focus:outline-none">
+            <select id="citySelect" onchange="updateView()" class="bg-gray-900 text-emerald-400 font-bold rounded p-1 border border-gray-600 focus:outline-none">
                 <option value="Murcia">Murcia, Spain</option>
                 <option value="Madrid">Madrid, Spain</option>
                 <option value="Barcelona">Barcelona, Spain</option>
@@ -30,9 +30,9 @@
             
             <!-- Category Tabs -->
             <div class="grid grid-cols-3 gap-2 mb-4">
-                <button class="bg-emerald-600 text-white font-semibold py-2 px-3 rounded-lg text-sm">Restaurants</button>
-                <button class="bg-gray-700 text-gray-300 font-semibold py-2 px-3 rounded-lg text-sm opacity-50">Bars</button>
-                <button class="bg-gray-700 text-gray-300 font-semibold py-2 px-3 rounded-lg text-sm opacity-50">Barbers</button>
+                <button id="tab-restaurants" onclick="switchTab('restaurants')" class="bg-emerald-600 text-white font-semibold py-2 px-3 rounded-lg text-sm transition-all">Restaurants</button>
+                <button id="tab-bars" onclick="switchTab('bars')" class="bg-gray-700 text-gray-300 font-semibold py-2 px-3 rounded-lg text-sm transition-all">Bars</button>
+                <button id="tab-barbers" onclick="switchTab('barbers')" class="bg-gray-700 text-gray-300 font-semibold py-2 px-3 rounded-lg text-sm transition-all">Barbers</button>
             </div>
 
             <!-- Dynamic Business Cards Container -->
@@ -42,7 +42,7 @@
         </div>
     </main>
 
-    <!-- Interactive Popup Modal (Hidden by Default) -->
+    <!-- Interactive Popup Modal -->
     <div id="loadingModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl max-w-sm w-full text-center flex flex-col gap-4 shadow-2xl">
             <div class="w-12 h-12 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -57,32 +57,92 @@
 
     <!-- Dynamic Functionality Script -->
     <script>
+        // Track the current active tab
+        let currentCategory = 'restaurants';
+
         const cityData = {
-            Murcia: [
-                { name: "La Pequeña Taberna", rating: "4.7", address: "Plaza de San Juan, 4, 30003 Murcia", hours: "13:00 - 16:00, 20:00 - 00:00", phone: "+34 968 21 98 40" },
-                { name: "Rincón de Pepe", rating: "4.5", address: "Plaza de Apóstoles, 30001 Murcia", hours: "13:30 - 16:00, 20:30 - 23:30", phone: "+34 968 21 22 39" }
-            ],
-            Madrid: [
-                { name: "Taberna El Sur", rating: "4.6", address: "Calle de la Torrecilla del Leal, 12, 28012 Madrid", hours: "13:00 - 00:00", phone: "+34 915 27 51 31" },
-                { name: "Asador Guetaria", rating: "4.4", address: "Calle de Aviación Española, 3, 28003 Madrid", hours: "13:30 - 16:00, 20:30 - 23:30", phone: "+34 915 54 62 25" }
-            ],
-            Barcelona: [
-                { name: "Cervecería Catalana", rating: "4.6", address: "Carrer de Mallorca, 236, 08008 Barcelona", hours: "09:00 - 01:30", phone: "+34 932 16 03 68" },
-                { name: "El Xampanyet", rating: "4.5", address: "Carrer de Montcada, 22, 08003 Barcelona", hours: "12:00 - 23:00", phone: "+34 933 19 53 64" }
-            ],
-            Sevilla: [
-                { name: "Eslava", rating: "4.7", address: "Calle Eslava, 3, 41002 Sevilla", hours: "12:30 - 00:00", phone: "+34 954 90 65 24" },
-                { name: "Taberna Coloniales", rating: "4.4", address: "Plaza de Cristo de Burgos, 19, 41003 Sevilla", hours: "12:00 - 16:00, 20:00 - 00:00", phone: "+34 954 50 11 37" }
-            ]
+            Murcia: {
+                restaurants: [
+                    { name: "La Pequeña Taberna", rating: "4.7", address: "Plaza de San Juan, 4, 30003 Murcia", hours: "13:00 - 16:00, 20:00 - 00:00", phone: "+34 968 21 98 40" },
+                    { name: "Rincón de Pepe", rating: "4.5", address: "Plaza de Apóstoles, 30001 Murcia", hours: "13:30 - 16:00, 20:30 - 23:30", phone: "+34 968 21 22 39" }
+                ],
+                bars: [
+                    { name: "La Trastienda Bar", rating: "4.4", address: "Calle San Jose, 7, 30003 Murcia", hours: "19:30 - 02:00", phone: "+34 968 21 85 90" },
+                    { name: "El Secreto de la Catedral", rating: "4.3", address: "Plaza Cardenal Belluga, 30001 Murcia", hours: "12:00 - 00:00", phone: "+34 968 90 12 34" }
+                ],
+                barbers: [
+                    { name: "Murcia Barber Studio", rating: "4.8", address: "Av. Juan Carlos I, 14, 30008 Murcia", hours: "09:30 - 20:30", phone: "+34 968 44 55 66" },
+                    { name: "La Barbería de San Antón", rating: "4.6", address: "Calle San Antón, 22, 30009 Murcia", hours: "10:00 - 20:00", phone: "+34 968 77 88 99" }
+                ]
+            },
+            Madrid: {
+                restaurants: [
+                    { name: "Taberna El Sur", rating: "4.6", address: "Calle de la Torrecilla del Leal, 12, 28012 Madrid", hours: "13:00 - 00:00", phone: "+34 915 27 51 31" },
+                    { name: "Asador Guetaria", rating: "4.4", address: "Calle de Aviación Española, 3, 28003 Madrid", hours: "13:30 - 16:00, 20:30 - 23:30", phone: "+34 915 54 62 25" }
+                ],
+                bars: [
+                    { name: "Salmon Guru", rating: "4.7", address: "Calle de Echegaray, 21, 28014 Madrid", hours: "19:00 - 02:30", phone: "+34 910 00 61 85" },
+                    { name: "1862 Dry Bar", rating: "4.6", address: "Calle de Pez, 27, 28004 Madrid", hours: "18:00 - 02:00", phone: "+34 609 53 11 51" }
+                ],
+                barbers: [
+                    { name: "Barberia Malasaña", rating: "4.9", address: "Calle de Colón, 4, 28004 Madrid", hours: "10:00 - 21:00", phone: "+34 910 25 33 44" },
+                    { name: "The Shaving Co. Madrid", rating: "4.7", address: "Paseo de la Castellana, 123, 28046 Madrid", hours: "09:00 - 21:00", phone: "+34 911 88 99 00" }
+                ]
+            },
+            Barcelona: {
+                restaurants: [
+                    { name: "Cervecería Catalana", rating: "4.6", address: "Carrer de Mallorca, 236, 08008 Barcelona", hours: "09:00 - 01:30", phone: "+34 932 16 03 68" },
+                    { name: "El Xampanyet", rating: "4.5", address: "Carrer de Montcada, 22, 08003 Barcelona", hours: "12:00 - 23:00", phone: "+34 933 19 53 64" }
+                ],
+                bars: [
+                    { name: "Paradiso", rating: "4.8", address: "Carrer de Rera Palau, 4, 08003 Barcelona", hours: "19:00 - 02:30", phone: "+34 933 60 72 22" },
+                    { name: "Two Schmucks", rating: "4.5", address: "Carrer de Joaquín Costa, 52, 08001 Barcelona", hours: "18:00 - 02:00", phone: "+34 644 90 22 11" }
+                ],
+                barbers: [
+                    { name: "Krispy Cuts Barber Shop", rating: "4.8", address: "Carrer de de la Riereta, 13, 08001 Barcelona", hours: "11:00 - 20:00", phone: "+34 931 56 78 90" },
+                    { name: "BCN Barber Studio", rating: "4.7", address: "Carrer de Balmes, 88, 08008 Barcelona", hours: "10:00 - 20:30", phone: "+34 935 12 34 56" }
+                ]
+            },
+            Sevilla: {
+                restaurants: [
+                    { name: "Eslava", rating: "4.7", address: "Calle Eslava, 3, 41002 Sevilla", hours: "12:30 - 00:00", phone: "+34 954 90 65 24" },
+                    { name: "Taberna Coloniales", rating: "4.4", address: "Plaza de Cristo de Burgos, 19, 41003 Sevilla", hours: "12:00 - 16:00, 20:00 - 00:00", phone: "+34 954 50 11 37" }
+                ],
+                bars: [
+                    { name: "Garlochi", rating: "4.6", address: "Calle Botijas, 4, 41003 Sevilla", hours: "21:00 - 02:00", phone: "+34 954 22 01 23" },
+                    { name: "El Rinconcillo", rating: "4.5", address: "Calle Gerona, 40, 41003 Sevilla", hours: "13:00 - 01:00", phone: "+34 954 22 31 83" }
+                ],
+                barbers: [
+                    { name: "Sevilla Barber Club", rating: "4.9", address: "Calle Feria, 85, 41003 Sevilla", hours: "09:30 - 20:30", phone: "+34 955 66 77 88" },
+                    { name: "Barbería El Porvenir", rating: "4.7", address: "Calle Diego de la Barrera, 8, 41013 Sevilla", hours: "10:00 - 20:00", phone: "+34 955 11 22 33" }
+                ]
+            }
         };
 
-        function updateCityData() {
+        function switchTab(category) {
+            currentCategory = category;
+            
+            // Update Tab button visuals
+            ['restaurants', 'bars', 'barbers'].forEach(cat => {
+                const btn = document.getElementById(`tab-${cat}`);
+                if (cat === category) {
+                    btn.className = "bg-emerald-600 text-white font-semibold py-2 px-3 rounded-lg text-sm transition-all animate-fade";
+                } else {
+                    btn.className = "bg-gray-700 text-gray-400 font-semibold py-2 px-3 rounded-lg text-sm transition-all";
+                }
+            });
+
+            updateView();
+        }
+
+        function updateView() {
             const selectedCity = document.getElementById("citySelect").value;
             const container = document.getElementById("businessContainer");
             container.innerHTML = "";
 
-            cityData[selectedCity].forEach(biz => {
-                // Escaping single quotes for restaurant names safely
+            const activeList = cityData[selectedCity][currentCategory];
+
+            activeList.forEach(biz => {
                 const safeName = biz.name.replace(/'/g, "\\'");
                 container.innerHTML += `
                     <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 shadow-sm flex flex-col gap-3">
@@ -114,7 +174,7 @@
         }
 
         // Initialize view
-        updateCityData();
+        updateView();
     </script>
 </body>
 </html>
