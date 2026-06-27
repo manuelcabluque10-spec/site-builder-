@@ -3,102 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lead Generator & Instant Web Builder</title>
+    <title>SiteSprout CRM - Spain Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen font-sans">
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4">
 
-    <header class="border-b border-gray-800 bg-gray-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <span class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">SiteSprout CRM</span>
+    <!-- Header Section -->
+    <header class="max-w-md mx-auto mb-6 flex flex-col gap-2">
+        <h1 class="text-2xl font-bold text-emerald-400">SiteSprout CRM</h1>
+        <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg border border-gray-700">
+            <span class="text-sm font-medium">Target Location:</span>
+            <!-- City Dropdown Selector -->
+            <select id="citySelect" onchange="updateCityData()" class="bg-gray-900 text-emerald-400 font-bold rounded p-1 border border-gray-600 focus:outline-none">
+                <option value="Murcia">Murcia, Spain</option>
+                <option value="Madrid">Madrid, Spain</option>
+                <option value="Barcelona">Barcelona, Spain</option>
+                <option value="Sevilla">Sevilla, Spain</option>
+            </select>
         </div>
-        <div class="text-sm text-gray-400">Target Location: <span class="text-emerald-400 font-semibold">Madrid, Spain</span></div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-5 bg-gray-950 p-6 rounded-2xl border border-gray-800 flex flex-col h-[80vh]">
+    <!-- Main Section -->
+    <main class="max-w-md mx-auto">
+        <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-xl">
             <h2 class="text-xl font-bold mb-4">Businesses Without Websites</h2>
-            <div class="grid grid-cols-3 gap-2 mb-6">
-                <button onclick="switchTab('restaurant')" id="tab-restaurant" class="tab-btn py-2 px-3 rounded-lg text-sm font-medium transition bg-emerald-600 text-white">Restaurants</button>
-                <button onclick="switchTab('bar')" id="tab-bar" class="tab-btn py-2 px-3 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:bg-gray-700">Bars</button>
-                <button onclick="switchTab('barbershop')" id="tab-barbershop" class="tab-btn py-2 px-3 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:bg-gray-700">Barbershops</button>
+            
+            <!-- Category Tabs -->
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <button class="bg-emerald-600 text-white font-semibold py-2 px-3 rounded-lg text-sm">Restaurants</button>
+                <button class="bg-gray-700 text-gray-300 font-semibold py-2 px-3 rounded-lg text-sm opacity-50">Bars</button>
+                <button class="bg-gray-700 text-gray-300 font-semibold py-2 px-3 rounded-lg text-sm opacity-50">Barbers</button>
             </div>
-            <div id="lead-list" class="space-y-3 overflow-y-auto flex-1 pr-2"></div>
-        </div>
 
-        <div class="lg:col-span-7 flex flex-col h-[80vh]">
-            <div class="bg-gray-950 border border-gray-800 rounded-2xl flex flex-col h-full overflow-hidden">
-                <div class="bg-gray-900 px-6 py-3 border-b border-gray-800 flex justify-between items-center">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span class="text-xs text-gray-500 ml-2 font-mono" id="browser-url">https://preview-generator.local/</span>
-                    </div>
-                    <button onclick="exportWebsite()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-md transition font-medium">Export Code</button>
-                </div>
-                <div class="bg-white flex-1 overflow-y-auto text-gray-900" id="website-sandbox">
-                    <div class="h-full flex flex-col items-center justify-center text-center p-8 text-gray-400 bg-gray-950">
-                        <svg class="w-16 h-16 mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 002-2H3a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        <p class="text-lg font-medium text-gray-300">No Website Selected</p>
-                        <p class="text-sm text-gray-500 mt-1">Select a business from the directory folders on the left to instantly build and map their custom landing page.</p>
-                    </div>
-                </div>
+            <!-- Dynamic Business Cards Container -->
+            <div id="businessContainer" class="flex flex-col gap-4">
+                <!-- Javascript will load cards here -->
             </div>
         </div>
     </main>
 
+    <!-- Dynamic Functionality Script -->
     <script>
-        // Sample seed database with tailored Spanish taglines
-        const businessDatabase = {
-            restaurant: [
-                { name: "Taberna El Sur", address: "Calle de la Torrecilla del Leal, 12, 28012 Madrid, Spain", phone: "+34 915 27 51 31", rating: "4.6", hours: "13:00 - 00:00", accent: "amber", tagline: "Tapas tradicionales madrileñas y sabor auténtico", taglineEn: "Traditional Madrileño Tapas & Authentic Flavor" },
-                { name: "Asador Guetaria", address: "Calle de Aviación Española, 3, 28003 Madrid, Spain", phone: "+34 915 54 62 25", rating: "4.4", hours: "13:30 - 16:00, 20:30 - 23:30", accent: "red", tagline: "Parrilla de carbón vasca de primera calidad y asados", taglineEn: "Premium Basque Charcoal Grills & Roasts" }
+        // Database of businesses across different cities
+        const cityData = {
+            Murcia: [
+                { name: "La Pequeña Taberna", rating: "4.7", address: "Plaza de San Juan, 4, 30003 Murcia", hours: "13:00 - 16:00, 20:00 - 00:00", phone: "+34 968 21 98 40" },
+                { name: "Rincón de Pepe", rating: "4.5", address: "Plaza de Apóstoles, 30001 Murcia", hours: "13:30 - 16:00, 20:30 - 23:30", phone: "+34 968 21 22 39" }
             ],
-            bar: [
-                { name: "Bar Cock", address: "Calle de la Reina, 16, 28004 Madrid, Spain", phone: "+34 915 32 28 26", rating: "4.5", hours: "19:00 - 03:00", accent: "indigo", tagline: "Cócteles históricos y conversaciones de medianoche desde 1921", taglineEn: "Historic Cocktails & Midnight Conversations Since 1921" },
-                { name: "La Venencia", address: "Calle de Echegaray, 7, 28014 Madrid, Spain", phone: "+34 914 29 73 13", rating: "4.3", hours: "12:30 - 15:30, 19:30 - 00:00", accent: "orange", tagline: "Bar de Jerez tradicional andaluz detenido en el tiempo", taglineEn: "Classic Andalusian Sherry Bar Frozen in Time" }
+            Madrid: [
+                { name: "Taberna El Sur", rating: "4.6", address: "Calle de la Torrecilla del Leal, 12, 28012 Madrid", hours: "13:00 - 00:00", phone: "+34 915 27 51 31" },
+                { name: "Asador Guetaria", rating: "4.4", address: "Calle de Aviación Española, 3, 28003 Madrid", hours: "13:30 - 16:00, 20:30 - 23:30", phone: "+34 915 54 62 25" }
             ],
-            barbershop: [
-                { name: "Barbería Malasaña", address: "Calle de Velarde, 24, 28004 Madrid, Spain", phone: "+34 910 12 34 56", rating: "4.8", hours: "10:00 - 20:30", accent: "stone", tagline: "Afeitados clásicos a navaja y cortes urbanos modernos", taglineEn: "Classic Razor Shaves & Modern Street Cuts" },
-                { name: "Peluquería Vallejo", address: "Calle de Atocha, 85, 28012 Madrid, Spain", phone: "+34 913 69 78 90", rating: "4.2", hours: "09:30 - 19:30", accent: "blue", tagline: "Barbería de precisión y estilo en el corazón de Madrid", taglineEn: "Precision Barbering & Styling in the Heart of Madrid" }
+            Barcelona: [
+                { name: "Cervecería Catalana", rating: "4.6", address: "Carrer de Mallorca, 236, 08008 Barcelona", hours: "09:00 - 01:30", phone: "+34 932 16 03 68" },
+                { name: "El Xampanyet", rating: "4.5", address: "Carrer de Montcada, 22, 08003 Barcelona", hours: "12:00 - 23:00", phone: "+34 933 19 53 64" }
+            ],
+            Sevilla: [
+                { name: "Eslava", rating: "4.7", address: "Calle Eslava, 3, 41002 Sevilla", hours: "12:30 - 00:00", phone: "+34 954 90 65 24" },
+                { name: "Taberna Coloniales", rating: "4.4", address: "Plaza de Cristo de Burgos, 19, 41003 Sevilla", hours: "12:00 - 16:00, 20:00 - 00:00", phone: "+34 954 50 11 37" }
             ]
         };
 
-        let currentTab = 'restaurant';
-        let currentlySelectedCode = '';
+        function updateCityData() {
+            const selectedCity = document.getElementById("citySelect").value;
+            const container = document.getElementById("businessContainer");
+            container.innerHTML = ""; // Clear current cards
 
-        function switchTab(tabName) {
-            currentTab = tabName;
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-emerald-600', 'text-white');
-                btn.classList.add('bg-gray-800', 'text-gray-400');
-            });
-            const activeBtn = document.getElementById(`tab-${tabName}`);
-            activeBtn.classList.remove('bg-gray-800', 'text-gray-400');
-            activeBtn.classList.add('bg-emerald-600', 'text-white');
-            renderLeads();
-        }
-
-        function renderLeads() {
-            const container = document.getElementById('lead-list');
-            container.innerHTML = '';
-            
-            businessDatabase[currentTab].forEach((biz, index) => {
+            // Build new cards dynamically
+            cityData[selectedCity].forEach(biz => {
                 container.innerHTML += `
-                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl hover:border-gray-700 transition flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start">
-                                <h3 class="font-bold text-gray-100 text-lg">${biz.name}</h3>
-                                <span class="bg-gray-800 text-yellow-400 text-xs px-2 py-0.5 rounded flex items-center font-semibold">★ ${biz.rating}</span>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1 line-clamp-2">${biz.address}</p>
-                            <div class="mt-2 text-xs text-gray-500 flex flex-col space-y-1">
-                                <span>🕒 Horario: ${biz.hours}</span>
-                                <span>📞 Teléfono: ${biz.phone}</span>
-                            </div>
+                    <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-lg font-bold text-gray-100">${biz.name}</h3>
+                            <span class="bg-yellow-500/10 text-yellow-400 font-bold text-xs px-2 py-1 rounded border border-yellow-500/20">★ ${biz.rating}</span>
                         </div>
-                        <button onclick="generateWebsite('${currentTab}', ${index})" class="mt-4 w-full bg-gray-800 hover:bg-emerald-700 hover:text-white transition text-emerald-400 font-medium py-2 rounded-lg text-sm">
+                        <div class="text-xs text-gray-400 flex flex-col gap-1">
+                            <p>📍 ${biz.address}</p>
+                            <p>🕒 Horario: ${biz.hours}</p>
+                            <p>📞 Teléfono: ${biz.phone}</p>
+                        </div>
+                        <button class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2 rounded-lg text-sm transition-colors mt-1">
                             Generate Website
                         </button>
                     </div>
@@ -106,120 +90,8 @@
             });
         }
 
-        function generateWebsite(type, index) {
-            const biz = businessDatabase[type][index];
-            document.getElementById('browser-url').innerText = `https://www.${biz.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.es`;
-            
-            // Check if business location is in Spain
-            const isSpain = biz.address.toLowerCase().includes('spain') || biz.address.toLowerCase().includes('españa');
-            
-            // Translation Dictionary Mapping Array
-            const lang = {
-                about: isSpain ? "Sobre Nosotros" : "About Us",
-                hoursInfo: isSpain ? "Horarios e Info" : "Hours & Info",
-                callNow: isSpain ? "Llamar / Reservar Ahora" : "Book / Call Now",
-                welcomeTitle: isSpain ? "Bienvenido al Secreto Mejor Guardado" : "Welcome to Our Location",
-                welcomeDesc: isSpain ? `Nos enorgullecemos de ofrecer una calidad exquisita y experiencias inolvidables aquí mismo en ${biz.address.split(',')[0]}. Ven a visitarnos y descubre por qué los clientes nos valoran con una excelente puntuación de ${biz.rating}/5 estrellas.` : `We pride ourselves on offering exquisite quality and unforgettable experiences right here at ${biz.address.split(',')[0]}. Come join us and find out why locals rank our location with an outstanding rating of ${biz.rating}/5 stars.`,
-                locContact: isSpain ? "📍 Ubicación y Contacto" : "📍 Location & Contact",
-                phoneLabel: isSpain ? "Teléfono" : "Phone",
-                schedLabel: isSpain ? "🕒 Horario de Apertura" : "🕒 Opening Schedule",
-                hoursLabel: isSpain ? "Horario Comercial:" : "Operating Hours:",
-                disclaimer: isSpain ? "*Los horarios pueden variar en días festivos. Por favor, llame para confirmar reservas." : "*Hours might vary on holidays. Please call to confirm bookings.",
-                rights: isSpain ? "Todos los derechos reservados." : "All Rights Reserved.",
-                tagline: isSpain ? biz.tagline : biz.taglineEn
-            };
-
-            let themeConfig = {
-                heroBg: "bg-amber-950 text-amber-50",
-                accentBtn: "bg-amber-600 hover:bg-amber-500 text-white",
-                accentText: "text-amber-600"
-            };
-
-            if (type === 'bar') {
-                themeConfig = {
-                    heroBg: "bg-indigo-950 text-indigo-50",
-                    accentBtn: "bg-indigo-600 hover:bg-indigo-500 text-white",
-                    accentText: "text-indigo-600"
-                };
-            } else if (type === 'barbershop') {
-                themeConfig = {
-                    heroBg: "bg-zinc-900 text-zinc-100",
-                    accentBtn: "bg-zinc-100 hover:bg-zinc-200 text-zinc-900",
-                    accentText: "text-zinc-400"
-                };
-            }
-
-            const dynamicHTML = `
-                <div class="font-sans antialiased bg-stone-50 text-stone-900 min-h-screen" lang="${isSpain ? 'es' : 'en'}">
-                    <nav class="${themeConfig.heroBg} px-6 py-4 flex justify-between items-center border-b border-black/10">
-                        <span class="text-xl font-serif font-black tracking-wide">${biz.name}</span>
-                        <div class="space-x-6 text-sm font-medium opacity-90">
-                            <a href="#about" class="hover:underline">${lang.about}</a>
-                            <a href="#details" class="hover:underline">${lang.hoursInfo}</a>
-                        </div>
-                    </nav>
-
-                    <header class="${themeConfig.heroBg} py-20 px-6 text-center border-b border-black/10">
-                        <h1 class="text-4xl md:text-5xl font-serif font-bold max-w-3xl mx-auto leading-tight">${biz.name}</h1>
-                        <p class="mt-4 text-lg opacity-80 max-w-xl mx-auto">${lang.tagline}</p>
-                        <div class="mt-8">
-                            <a href="tel:${biz.phone}" class="${themeConfig.accentBtn} font-medium px-6 py-3 rounded-full text-sm shadow-md transition-all">
-                                ${lang.callNow}
-                            </a>
-                        </div>
-                    </header>
-
-                    <section id="about" class="py-16 max-w-4xl mx-auto px-6 text-center">
-                        <h2 class="text-2xl font-serif font-bold text-stone-800">${lang.welcomeTitle}</h2>
-                        <p class="mt-4 text-stone-600 leading-relaxed">${lang.welcomeDesc}</p>
-                    </section>
-
-                    <section id="details" class="bg-stone-100 py-12 border-t border-b border-stone-200">
-                        <div class="max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h3 class="font-serif font-bold text-lg mb-3"> ${lang.locContact}</h3>
-                                <p class="text-stone-600 text-sm leading-relaxed">${biz.address}</p>
-                                <p class="mt-3 text-sm font-semibold">${lang.phoneLabel}: <a href="tel:${biz.phone}" class="${themeConfig.accentText} underline">${biz.phone}</a></p>
-                            </div>
-                            <div>
-                                <h3 class="font-serif font-bold text-lg mb-3">${lang.schedLabel}</h3>
-                                <div class="bg-white p-4 rounded-xl border border-stone-200 text-sm shadow-sm text-stone-700">
-                                    <div class="flex justify-between font-medium">
-                                        <span>${lang.hoursLabel}</span>
-                                        <span class="${themeConfig.accentText}">${biz.hours}</span>
-                                    </div>
-                                    <p class="text-xs text-stone-400 mt-2 italic">${lang.disclaimer}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <footer class="bg-stone-900 text-stone-400 text-xs py-8 text-center">
-                        <p>© 2026 ${biz.name}. ${lang.rights}</p>
-                    </footer>
-                </div>
-            `;
-
-            const sandbox = document.getElementById('website-sandbox');
-            sandbox.innerHTML = dynamicHTML;
-            currentlySelectedCode = dynamicHTML;
-        }
-
-        function exportWebsite() {
-            if(!currentlySelectedCode) {
-                alert("Please select and generate a website first!");
-                return;
-            }
-            const element = document.createElement("a");
-            const file = new Blob([currentlySelectedCode], {type: 'text/html'});
-            element.href = URL.createObjectURL(file);
-            element.download = "index.html";
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-        }
-
-        renderLeads();
+        // Initialize with default city (Murcia)
+        updateCityData();
     </script>
 </body>
 </html>
